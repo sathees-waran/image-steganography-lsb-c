@@ -1,16 +1,62 @@
 #include <stdio.h>
+#include<string.h>
 #include "encode.h"
 #include "types.h"
 
 /* Function Definitions */
-/*int check_operation_type(char *argv[]);
+int check_operation_type(char *argv[])
 {
     if(argv[1] == NULL) return e_unsupported;
     if(strcmp(argv[1], "-e") == 0) return e_encode;
     if(strcmp(argv[1], "-d") == 0) return e_decode;
     return e_unsupported;
-}*/
+}
 
+Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
+{
+    if(argv[2] == NULL) 
+    {
+        printf("bmp file has not been passed\n");
+        return e_failure;
+    }
+    //Check argv[2] is bmp file
+    if(strstr(argv[2], ".bmp") == NULL)
+    {
+        printf("Invalid bmp file\n");
+        return e_failure;
+    }
+    //Storing argv[2] bmp filename to structure
+    encInfo -> src_image_fname = argv[2];
+
+    if(argv[3] == NULL) 
+    {
+        printf("Secret file is Not Present\n");
+        return e_failure;
+    }
+    //Check argv[3] is Secret file
+    if(strchr(argv[3], ".") == NULL)
+    {
+        printf("Invalid Secret file\n");
+        return e_failure;
+    }
+    //Storing argv[3] secret filename to structure
+    encInfo -> secret_fname = argv[3];
+
+    if(argv[4] == NULL) 
+    {
+       encInfo -> stego_image_fname = "stego.bmp";
+    }
+    else
+    {
+        if(strstr(argv[4], ".bmp") == NULL)
+        {
+            printf("Invalid output file name\n");
+            return e_failure;
+        }
+         encInfo -> stego_image_fname = argv[4];
+    }
+
+}
 /* Get image size
  * Input: Image file ptr
  * Output: width * height * bytes per pixel (3 in our case)
