@@ -5,7 +5,6 @@
 #include "common.h"
 
 /* Function Definitions */
-<<<<<<< HEAD
 OperationType check_operation_type(char *argv[])
 {
     if (argv[1] == NULL) return e_unsupported;
@@ -17,19 +16,6 @@ OperationType check_operation_type(char *argv[])
     return e_unsupported;
 }
 
-=======
-int check_operation_type(char *argv[])
-{
-    if (argv[1] == NULL)
-        return e_unsupported;
-    if (strcmp(argv[1], "-e") == 0)
-        return e_encode;
-    if (strcmp(argv[1], "-d") == 0)
-        return e_decode;
-    return e_unsupported;
-}
-
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
 {
     if (argv[2] == NULL)
@@ -52,11 +38,7 @@ Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
         return e_failure;
     }
     // Check argv[3] is Secret file
-<<<<<<< HEAD
     if (strchr(argv[3], '.') == NULL)
-=======
-    if (strchr(argv[3], ".") == NULL)
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
     {
         printf("Invalid Secret file\n");
         return e_failure;
@@ -76,10 +58,7 @@ Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
             return e_failure;
         }
         encInfo->stego_image_fname = argv[4];
-<<<<<<< HEAD
         return e_success;
-=======
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
     }
 }
 /* Get image size
@@ -174,21 +153,12 @@ Status do_encoding(EncodeInfo *encInfo)
         return e_failure;
     }
 
-<<<<<<< HEAD
     encode_magic_string(MAGIC_STRING, encInfo);
     encode_secret_file_size(encInfo -> extn_size, encInfo );
     encode_secret_file_extn(encInfo -> extn_secret_file,encInfo);
     encode_secret_file_size(encInfo -> size_secret_file, encInfo);
     encode_secret_file_data(encInfo);
     copy_remaining_img_data(encInfo->fptr_src_image, encInfo->fptr_stego_image);
-=======
-    // encode_magic_string(MAGIC_STRING, encInfo);
-    // Status encode_extn_file_size(encInfo -> extn_size, encInfo );
-    // encode_secret_file_extn(const char *file_exth, EncodeInfo *encInfo);
-    // encode_secret_file_size(encInfo->size_secret_file, encInfo);
-    // encode_secret_file_data(EncodeInfo *encInfo);
-    // copy_remaining_img_data(encInfo->fptr_src_image, encInfo->fptr_stego_image);
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 
     return e_success;
 }
@@ -196,21 +166,13 @@ Status do_encoding(EncodeInfo *encInfo)
 Status check_capacity(EncodeInfo *encInfo)
 {
     // get secret file extension
-<<<<<<< HEAD
     strcpy(encInfo->extn_secret_file, strchr(encInfo->secret_fname, '.'));
-=======
-    strcpy(encInfo->extn_secret_file, strchr(encInfo->secret_fname, "."));
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 
     // Get length of extension
     encInfo->extn_size = strlen(encInfo->extn_secret_file);
 
     // get secret file size
-<<<<<<< HEAD
     fseek(encInfo->fptr_secret, 0, SEEK_END);
-=======
-    fseek(encInfo->fptr_secret, SEEK_END, 1);
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
     encInfo->size_secret_file = ftell(encInfo->fptr_secret);
 
     // Reset secret file back to first Byte
@@ -231,7 +193,6 @@ Status check_capacity(EncodeInfo *encInfo)
 }
 Status copy_bmp_header(FILE *fptr_src_image, FILE *fptr_dest_image)
 {
-<<<<<<< HEAD
     char header[54];
     // read 54 bytes from fptr_src_image
     rewind(fptr_src_image);
@@ -239,10 +200,6 @@ Status copy_bmp_header(FILE *fptr_src_image, FILE *fptr_dest_image)
     // write 54 bytes to fptr_dest_image
     fwrite(header, 1, 54, fptr_dest_image);
 
-=======
-    // read 54 bytes from fptr_src_image
-    // write 54 bytes to fptr_dest_image
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
     return e_success;
 }
 
@@ -254,18 +211,11 @@ Status encode_byte_to_lsb(char data, char *image_buffer)
         char mask = 1 << n;
         char bit = data & mask;
         bit = bit >> n;
-<<<<<<< HEAD
         image_buffer[i] = image_buffer[i] & 0xfe;
         image_buffer[i] = image_buffer[i] | bit;
         n--;
     }
     return e_success;
-=======
-        buffer[i] = buffer[i] & 0xfe;
-        buffer[i] = buffer[i] | bit;
-        n--;
-    }
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 }
 Status encode_size_to_lsb(int data, char *image_buffer)
 { // image_buffer size is 32 bytes
@@ -275,24 +225,16 @@ Status encode_size_to_lsb(int data, char *image_buffer)
         int mask = 1 << n;
         int bit = data & mask;
         bit = bit >> n;
-<<<<<<< HEAD
         image_buffer[i] = image_buffer[i] & 0xfe;
         image_buffer[i] = image_buffer[i] | bit;
         n--;
     }
     return e_success;
-=======
-        buffer[i] = buffer[i] & 0xfe;
-        buffer[i] = buffer[i] | bit;
-        n--;
-    }
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 }
 
 Status encode_magic_string(const char *magic_string, EncodeInfo *encInfo)
 {
     for (int i = 0; i < 2; i++)
-<<<<<<< HEAD
     { // 1. read 8 bytes of data buffer from src get_file_size
         char buffer[8];
         fread(buffer, 1, 8, encInfo -> fptr_src_image);
@@ -302,15 +244,6 @@ Status encode_magic_string(const char *magic_string, EncodeInfo *encInfo)
         fwrite(buffer, 1, 8, encInfo -> fptr_stego_image);
     }
     return e_success;
-=======
-    { // 1. nead 8 bytes of data buffer from src get_file_size
-        char buffer[8];
-
-        encode_byte_to_lsb(magic_string[i], buffer);
-
-        // 2.write 8 bytes of buffer to stego file
-    }
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 }
 
 Status encode_extn_file_size(int extn_size, EncodeInfo *encInfo)
@@ -318,22 +251,16 @@ Status encode_extn_file_size(int extn_size, EncodeInfo *encInfo)
     char buffer[32];
 
     // 1.read 32 bytes from src file
-<<<<<<< HEAD
     fread(buffer, 1, 32, encInfo -> fptr_src_image);
     encode_size_to_lsb(extn_size, buffer);
     // 2.write 32 bytes buffer to stego file
     fwrite(buffer, 1, 32, encInfo -> fptr_stego_image);
     return e_success;
 
-=======
-    encode_size_to_lsb(extn_size, buffer);
-    // 2.write 32 bytes buffer to stego file
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 }
 
 Status encode_secret_file_extn(const char *file_extn, EncodeInfo *encInfo)
 {
-<<<<<<< HEAD
     for (int i = 0; file_extn[i] != '\0'; i++)
     {
         char buffer[8];
@@ -356,27 +283,11 @@ Status encode_secret_file_size(long file_size, EncodeInfo *encInfo)
     fwrite(buffer, 1, 32, encInfo -> fptr_stego_image);
 
     return e_success;
-=======
-    for (int i = 0; file_extn[i] /= '\0'; i++)
-    {
-        char buffer[8];
-        // read 8 bytes from src file and store to buffer
-        encode_byte_to_lsb(file_extn[i], buffer);
-        // write 8 bytes of buffer to stego file
-    }
-}
-Status encode_secret_file_size(int file_size, EncodeInfo *encInfo)
-{ // read 32 bytes from src image and store to buffer
-    char buffer[32];
-    encode_size_to_lsb(file_size, buffer);
-    // write 32 bytes of buffer to stego file
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 }
 
 Status encode_secret_file_data(EncodeInfo *encInfo)
 {
     char ch;
-<<<<<<< HEAD
     while (fread(&ch, 1, 1, encInfo->fptr_secret) == 1)
     { // read 1 byte from sec file
         char buffer[8];
@@ -389,20 +300,10 @@ Status encode_secret_file_data(EncodeInfo *encInfo)
         fwrite(buffer, 1, 8, encInfo -> fptr_stego_image);
     }
     return e_success;
-=======
-    while (!feof(encInfo->fptr_secret))
-    { // read 1 byte from sec file
-        char buffer[8];
-        // read 8 bytes from src image
-        encode_byte_to_lsb(ch, buffer);
-        // write buffer to stego file
-    }
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
 }
 
 Status copy_remaining_img_data(FILE *fptr_src, FILE *fptr_dest)
 {
-<<<<<<< HEAD
     char ch;
     while (!feof(fptr_src))
     {
@@ -414,12 +315,3 @@ Status copy_remaining_img_data(FILE *fptr_src, FILE *fptr_dest)
     }
     return e_success;
 }
-=======
-
-    while (!feof(fptr_src))
-    {   // read 1 byte from src file
-        // write 1 byte to dest file
-    }
-}
-
->>>>>>> cfb1abbfa0b638e9ec8d4e277e2a6f950943d68f
