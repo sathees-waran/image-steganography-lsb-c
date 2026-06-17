@@ -42,10 +42,10 @@ intact in the output file.
 - [x] File handling: opening source image, secret file, and output 
       stego image with error handling
 - [x] Reading BMP image dimensions to calculate image capacity
-- [ ] Command-line argument parsing and validation
-- [ ] Capacity check (ensuring secret data fits within the image)
-- [ ] BMP header copy to stego image
-- [ ] Core LSB encoding logic
+- [x] Command-line argument parsing and validation
+- [x] Capacity check (ensuring secret data fits within the image)
+- [x] BMP header copy to stego image
+- [x] Core LSB encoding logic
 - [ ] Core LSB decoding logic
 - [ ] Decode-side implementation (decode.c, decode.h, test_decode.c)
 
