@@ -1,3 +1,6 @@
+/* File: types.h
+ * Brief: Common typedefs and enums (Status, OperationType) shared by encode and decode modules. */
+
 #ifndef TYPES_H
 #define TYPES_H
 
