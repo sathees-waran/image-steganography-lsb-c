@@ -46,8 +46,8 @@ intact in the output file.
 - [x] Capacity check (ensuring secret data fits within the image)
 - [x] BMP header copy to stego image
 - [x] Core LSB encoding logic
-- [ ] Core LSB decoding logic
-- [ ] Decode-side implementation (decode.c, decode.h, test_decode.c)
+- [x] Core LSB decoding logic
+- [x] Decode-side implementation (decode.c, decode.h, test_decode.c)
 
 ## Project Structure
 - `types.h` – common type definitions (Status, OperationType)
