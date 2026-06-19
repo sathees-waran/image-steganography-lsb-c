@@ -1,10 +1,13 @@
+/* File: encode.c
+ * Brief: Implements the LSB encoding pipeline - hides a secret file's data inside a BMP image. */
+
 #include <stdio.h>
 #include <string.h>
 #include "encode.h"
 #include "types.h"
 #include "common.h"
 
-/* Function Definitions */
+/* Determines encode/decode mode from argv[1] ("-e"/"-d"). */
 OperationType check_operation_type(char *argv[])
 {
     if (argv[1] == NULL) return e_unsupported;
@@ -16,6 +19,7 @@ OperationType check_operation_type(char *argv[])
     return e_unsupported;
 }
 
+/* Validates and stores source image, secret file, and optional output filename from argv. */
 Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
 {
     if (argv[2] == NULL)
@@ -60,7 +64,9 @@ Status read_and_validate_encode_args(char *argv[], EncodeInfo *encInfo)
         encInfo->stego_image_fname = argv[4];
         return e_success;
     }
+    return e_success;
 }
+
 /* Get image size
  * Input: Image file ptr
  * Output: width * height * bytes per pixel (3 in our case)
@@ -85,13 +91,7 @@ uint get_image_size_for_bmp(FILE *fptr_image)
     return width * height * 3;
 }
 
-/*
- * Get File pointers for i/p and o/p files
- * Inputs: Src Image file, Secret file and
- * Stego Image file
- * Output: FILE pointer for above files
- * Return Value: e_success or e_failure, on file errors
- */
+/* Opens source image, secret file, and stego output file; returns e_failure if any fopen fails. */
 Status open_files(EncodeInfo *encInfo)
 {
     // Src Image file
@@ -131,7 +131,7 @@ Status open_files(EncodeInfo *encInfo)
     return e_success;
 }
 
-//--- encoding part ---//
+/* Top-level driver: opens files, checks capacity, then encodes header/magic string/extension/size/data in order. */
 Status do_encoding(EncodeInfo *encInfo)
 {
     int ret = open_files(encInfo);
@@ -154,15 +154,19 @@ Status do_encoding(EncodeInfo *encInfo)
     }
 
     encode_magic_string(MAGIC_STRING, encInfo);
-    encode_secret_file_size(encInfo -> extn_size, encInfo );
+    encode_secret_file_extn_size(encInfo -> extn_size, encInfo );
     encode_secret_file_extn(encInfo -> extn_secret_file,encInfo);
     encode_secret_file_size(encInfo -> size_secret_file, encInfo);
     encode_secret_file_data(encInfo);
     copy_remaining_img_data(encInfo->fptr_src_image, encInfo->fptr_stego_image);
+    fclose(encInfo->fptr_src_image);
+    fclose(encInfo->fptr_secret);
+    fclose(encInfo->fptr_stego_image);
 
     return e_success;
 }
 
+/* Computes secret file's extension/size and checks the source image has enough bytes to hide it all. */
 Status check_capacity(EncodeInfo *encInfo)
 {
     // get secret file extension
@@ -191,6 +195,8 @@ Status check_capacity(EncodeInfo *encInfo)
     else
         return e_failure;
 }
+
+/* Copies the 54-byte BMP header unchanged from source to stego image. */
 Status copy_bmp_header(FILE *fptr_src_image, FILE *fptr_dest_image)
 {
     char header[54];
@@ -203,6 +209,7 @@ Status copy_bmp_header(FILE *fptr_src_image, FILE *fptr_dest_image)
     return e_success;
 }
 
+/* Hides one byte of data across the LSBs of 8 image bytes. */
 Status encode_byte_to_lsb(char data, char *image_buffer)
 { // image_buffer arr size is 8 bytes
     int n = 7;
@@ -217,6 +224,8 @@ Status encode_byte_to_lsb(char data, char *image_buffer)
     }
     return e_success;
 }
+
+/* Hides a 32-bit integer across the LSBs of 32 image bytes. */
 Status encode_size_to_lsb(int data, char *image_buffer)
 { // image_buffer size is 32 bytes
     int n = 31;
@@ -232,6 +241,7 @@ Status encode_size_to_lsb(int data, char *image_buffer)
     return e_success;
 }
 
+/* Encodes the 2-character magic string into the first 16 image bytes after the header. */
 Status encode_magic_string(const char *magic_string, EncodeInfo *encInfo)
 {
     for (int i = 0; i < 2; i++)
@@ -246,7 +256,8 @@ Status encode_magic_string(const char *magic_string, EncodeInfo *encInfo)
     return e_success;
 }
 
-Status encode_extn_file_size(int extn_size, EncodeInfo *encInfo)
+/* Encodes the extension's character count into the next 32 image bytes. */
+Status encode_secret_file_extn_size(int extn_size, EncodeInfo *encInfo)
 {
     char buffer[32];
 
@@ -259,6 +270,7 @@ Status encode_extn_file_size(int extn_size, EncodeInfo *encInfo)
 
 }
 
+/* Encodes each character of the secret file's extension into successive image bytes. */
 Status encode_secret_file_extn(const char *file_extn, EncodeInfo *encInfo)
 {
     for (int i = 0; file_extn[i] != '\0'; i++)
@@ -274,8 +286,11 @@ Status encode_secret_file_extn(const char *file_extn, EncodeInfo *encInfo)
     }
     return e_success;
 }
+
+/* Encodes the secret file's byte count into the next 32 image bytes. */
 Status encode_secret_file_size(long file_size, EncodeInfo *encInfo)
-{ // 1.read 32 bytes from src image and store to buffer
+{ 
+    // 1.read 32 bytes from src image and store to buffer
     char buffer[32];
     fread(buffer, 1, 32, encInfo -> fptr_src_image);
     encode_size_to_lsb(file_size, buffer);
@@ -285,6 +300,7 @@ Status encode_secret_file_size(long file_size, EncodeInfo *encInfo)
     return e_success;
 }
 
+/* Reads the secret file byte by byte and hides each byte across 8 image bytes until EOF. */
 Status encode_secret_file_data(EncodeInfo *encInfo)
 {
     char ch;
@@ -302,6 +318,7 @@ Status encode_secret_file_data(EncodeInfo *encInfo)
     return e_success;
 }
 
+/* Copies remaining untouched image bytes from source to stego image after encoding. */
 Status copy_remaining_img_data(FILE *fptr_src, FILE *fptr_dest)
 {
     char ch;
