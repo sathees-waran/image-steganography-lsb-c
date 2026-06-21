@@ -91,7 +91,7 @@ they were written.
 | **Structures (`struct`)** | Metadata/config structs defined in `types.h`, used across `encode.c` and `decode.c` |
 | **File Handling** | `fopen`, `fread`, `fwrite`, `fclose` to read/write BMP and secret files in binary mode |
 | **Pointers** | Struct pointers passed to encode/decode functions to avoid copying and to mutate state |
-| **Binary I/O & Bitwise Operators** | `&`, `|`, `<<`, `>>` to manipulate individual bits for LSB encoding/decoding |
+| **Bitwise Operators** | `&`, `\|`, `<<`, `>>` to manipulate individual bits for LSB encoding/decoding |
 | **File Offsets (`fseek`/`rewind`)** | `fseek(fptr, 54, SEEK_SET)` to skip the BMP header; `rewind()` before copying header bytes |
 | **String Functions** | `strcpy`, `strcmp`, `strlen` from `<string.h>` for filenames and extension handling |
 | **Modular Programming** | Logic split across `encode.c`, `decode.c`, `common.h`, and `types.h` |
@@ -101,7 +101,8 @@ they were written.
 | **Return Codes / Enums** | `Status` enum (`e_success`, `e_failure`) used as function return values for error handling |
 | **Command-Line Arguments** | `argc`, `argv` used to pass BMP file, secret file, and mode flags |
 | **Preprocessor Macros** | `#define MAGIC_STRING`, size constants, etc. |
-| **Defined Encoding Order** | Magic string → extension size → extension → file size → file data, embedded and decoded in fixed sequence |
+| **Defined Encoding Order** | Magic string → extension size → extension string → file size → file data, embedded in fixed sequence during encoding |
+| **Defined Decoding Order** | Magic string → extension size → extension string → file size → file data, read back in the same sequence to reconstruct the output file |
 
 ## Build Instructions
 The current testable component verifies file handling and image size 
