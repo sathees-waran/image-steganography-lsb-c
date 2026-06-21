@@ -109,8 +109,13 @@ The current testable component verifies file handling and image size
 calculation:
 
 ```bash
-gcc test_encode.c encode.c -o test_encode
-./test_encode
+encoding
+gcc main.c encode.c  
+./a.out -e input.bmp secret.txt setgo.bmp
+decoding
+gcc main.c decode.c
+./a.out -d stego.bmp output
+
 ```
 
 ## Roadmap
