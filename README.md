@@ -1,9 +1,9 @@
 # Image Steganography using LSB (C)
 
 ## Project Status
-In active development. The project structure and encode-side file 
-handling are implemented and tested. Core encoding/decoding logic 
-(LSB embedding and extraction) is in progress.
+The project implements a full LSB-based steganography 
+pipeline in C, covering both encoding and decoding, with file handling 
+tested end to end.
 
 ## Overview
 Image steganography is the practice of hiding secret data (text, files) 
@@ -36,39 +36,34 @@ most 1 (out of 255) — a change too small for the human eye to detect.
 Since the data isn't compressed or reorganized, hidden bits remain 
 intact in the output file.
 
-## Current Progress
-- [x] Project structure and modular design (types, encode interface, 
-      shared constants)
-- [x] File handling: opening source image, secret file, and output 
-      stego image with error handling
-- [x] Reading BMP image dimensions to calculate image capacity
-- [x] Command-line argument parsing and validation
-- [x] Capacity check (ensuring secret data fits within the image)
-- [x] BMP header copy to stego image
-- [x] Core LSB encoding logic
-- [x] Core LSB decoding logic
-- [x] Decode-side implementation (decode.c, decode.h, test_decode.c)
+## Features
+- Opening and validating source image, secret file, and output file 
+  in binary mode
+- Calculating BMP image capacity from header dimensions
+- Command-line argument parsing and validation (`-e` for encode, 
+  `-d` for decode)
+- Capacity check to ensure secret data fits within the image before 
+  encoding
+- BMP header copy from source image to stego image
+- Full LSB encoding pipeline: magic string, file extension, file size, 
+  and secret data embedded in a fixed sequence
+- Full LSB decoding pipeline: magic string, extension, file size, and 
+  data read back in the same sequence to reconstruct the original file
+- Decode-side implementation with dedicated source, header, and test 
+  driver files
 
 ## Project Structure
 - `types.h` – common type definitions (Status, OperationType)
 - `common.h` – shared constants (magic string used to identify a 
   stego image)
 - `encode.h` – encoding interface and EncodeInfo structure
-- `encode.c` – encoding implementation (in progress)
+- `encode.c` – encoding implementation
+- `decode.h` – decoding interface and DecodeInfo structure
+- `decode.c` – decoding implementation
+- `main.c` – entry point; parses mode flags and dispatches to encode 
+  or decode
 - `test_encode.c` – test driver for encoding functions
-
-## Features
-
-### Implemented
-- Opening and validating source image, secret file, and output file
-- Calculating BMP image capacity from header dimensions
-
-### Planned
-- Full LSB encoding pipeline (magic string, file extension, file size, 
-  and data embedding)
-- Full LSB decoding pipeline
-- Capacity validation before encoding
-- Command-line interface for encode/decode operations
+- `test_decode.c` – test driver for decoding functions
 
 ## How It Works (LSB Technique)
 Each byte of the secret data is broken into individual bits. Each bit 
@@ -97,7 +92,7 @@ they were written.
 | **Modular Programming** | Logic split across `encode.c`, `decode.c`, `common.h`, and `types.h` |
 | **Header Guards** | `#ifndef` / `#define` / `#endif` in `encode.h`, `decode.h`, `types.h`, `common.h` |
 | **`typedef`** | Used to alias `struct` types for encode/decode metadata |
-| **Switch-Case** | Mode selection (encode `-e` vs decode `-d`) in `main` / `test_encode.c` |
+| **Switch-Case** | Mode selection (encode `-e` vs decode `-d`) in `main.c` |
 | **Return Codes / Enums** | `Status` enum (`e_success`, `e_failure`) used as function return values for error handling |
 | **Command-Line Arguments** | `argc`, `argv` used to pass BMP file, secret file, and mode flags |
 | **Preprocessor Macros** | `#define MAGIC_STRING`, size constants, etc. |
@@ -105,26 +100,18 @@ they were written.
 | **Defined Decoding Order** | Magic string → extension size → extension string → file size → file data, read back in the same sequence to reconstruct the output file |
 
 ## Build Instructions
-The current testable component verifies file handling and image size 
-calculation:
 
+### Encoding
 ```bash
-encoding
-gcc main.c encode.c  
-./a.out -e input.bmp secret.txt setgo.bmp
-decoding
-gcc main.c decode.c
-./a.out -d stego.bmp output
-
+gcc main.c encode.c -o encode
+./encode -e input.bmp secret.txt stego.bmp
 ```
 
-## Roadmap
-- [ ] Implement argument parsing and validation
-- [ ] Implement capacity check
-- [ ] Implement BMP header copy
-- [ ] Implement core LSB encode/decode functions
-- [ ] Build decode-side files and test driver
-- [ ] Add a simple usage interface (CLI arguments: -e/-d)
+### Decoding
+```bash
+gcc main.c decode.c -o decode
+./decode -d stego.bmp output
+```
 
 ## Contact
 Satheeswaran M
