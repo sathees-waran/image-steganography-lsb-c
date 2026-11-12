@@ -184,8 +184,8 @@ Status check_capacity(EncodeInfo *encInfo)
 
     // Calculating total bytes
     /* Header + Magic string + extension size (always integer) + extension(encInfo -> extn_size * 8) + file size + file data (encInfo -> size_secret_file * 8)*/
-    int Total_bytes_needed = 54 + 16 + 32 + (encInfo->extn_size * 8) + 32 + (encInfo->extn_size * 8) + 32 + (encInfo->size_secret_file * 8);
-
+    int Total_bytes_needed = 54 + 16 + 32 + (encInfo->extn_size * 8) + 32 + (encInfo->size_secret_file * 8);
+    printf("Total_bytes_needed = %d\n", Total_bytes_needed);
     // bmp file size
     int bmp_file_size = get_image_size_for_bmp(encInfo->fptr_src_image);
 
@@ -231,9 +231,7 @@ Status encode_size_to_lsb(int data, char *image_buffer)
     int n = 31;
     for (int i = 0; i < 32; i++)
     {
-        int mask = 1 << n;
-        int bit = data & mask;
-        bit = bit >> n;
+        int bit = ((unsigned int)data >> n) & 1;
         image_buffer[i] = image_buffer[i] & 0xfe;
         image_buffer[i] = image_buffer[i] | bit;
         n--;
@@ -322,11 +320,9 @@ Status encode_secret_file_data(EncodeInfo *encInfo)
 Status copy_remaining_img_data(FILE *fptr_src, FILE *fptr_dest)
 {
     char ch;
-    while (!feof(fptr_src))
+    // fread both reads the byte and tells us whether it succeeded
+    while (fread(&ch, 1, 1, fptr_src) == 1)
     {
-        // Read 1 byte from src file
-        fread(&ch, 1, 1, fptr_src);
-
         // Write 1 byte to dest file
         fwrite(&ch, 1, 1, fptr_dest);
     }
